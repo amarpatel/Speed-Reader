@@ -1,0 +1,148 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Speed Reader</title>
+	<style type="text/css">
+	.playPauseReset, .speedtext, .ui{
+		text-align: center;
+	}
+	.playPauseReset{
+		margin: 20px 0 20px;
+	}
+	.speedfield{
+		margin-bottom: 0;
+	}
+	.speedtext{
+		border: 1px solid black;
+		width: 500px;
+		height: 150px;
+		margin: 0 auto 0 auto;
+		font-size: 1em;
+	}
+	.userText{
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+		width: 500px;
+		height: 250px;
+	}
+	.ui{
+		margin-top: 16px;
+	}
+	.ui, .confirmation {
+		margin-bottom: 0px;
+	}
+	.pctComplete, .confirmation{
+		margin-top: 0px;
+	}
+	</style>
+</head>
+<body>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script>
+
+	function getSelectedText() {
+		if (window.getSelection) {
+			userStr = window.getSelection();
+		}
+		else if (document.selection) {
+			userStr = document.selection.createRange().text;
+		}
+		return '';
+	}
+	var speedVal = 600, run, clicked = false, progress = 0, userStr, words, fontSize = 1;
+
+	//Puts each word of text into .speedtext
+	var speedReader = function (str) {
+		var milliseconds = 60000/speedVal;
+		function myLoop () {
+			setTimeout(function(){
+				$('.speedtext').text(words[progress]);
+				progress++;
+				if (progress < words.length && run === true) {
+					$('.pctComplete').text(Math.round(100*(progress/words.length)) + '% Completed');
+					myLoop();
+				} else {
+					$('.playPause').text('Play');
+					clicked = false;
+					run = false;
+					progress = 0;
+				}
+			},milliseconds)};
+			myLoop();
+		}
+	//sets logic for assigning speedVal's value and confirmation of that action
+	$(document).ready(function(){
+	 	//Makes default text disappear when text field is clicked
+	 	$('.speedField').val('Enter WPM Here');
+	 	$('.speedField').on('click',function(){
+	 		$(this).val('');
+	 	});
+	 	//Assigned SpeedVal to entered amount
+	 	$('.speedButton').on('click',function(){
+	 		if (isNaN($('.speedField').val()) === true) {
+	 			$('.speedField').val('Default is 600')
+	 		} else {
+	 			speedVal = $('.speedField').val();
+	 			$('.speedField').val(speedVal);
+	 			$('.confirmation').text(speedVal + ' WPM');
+	 		}
+	 	});
+	 	//Adds functionality for pause and play buttons
+	 	$('.playPause').on('click',function(){
+	 		if (clicked === false) {
+	 			if ($('.userText').val() === 'Paste your text here') {
+	 				$('.userText').val('Please paste your text in this box');
+	 				return false;
+	 			} else {
+	 				userStr = $('.userText').val();
+	 				words = userStr.split(' ');
+	 				speedReader(userStr);
+	 				$('.playPause').text('Pause');
+	 				clicked = true;
+	 				run = true;
+	 			}
+	 		}
+	 		else {
+	 			$('.playPause').text('Play');
+	 			clicked = false;
+	 			run = false;
+	 		}
+	 	})
+	 	//Adds functionality for reset button
+	 	$('.reset').on('click',function(){
+	 		progress = 0;
+	 		$('.pctComplete').text('0% Completed');
+	 		$('.speedtext').text(words[0]);
+	 	})
+	 	//Text for userText
+	 	$('.userText').val('Paste your text here');
+	 	//Text for initial WPM
+	 	$('.confirmation').text(speedVal + " WPM");
+	 	//Change Font Sizes
+	 	$('.upFontSize').on('click',function()
+	 	{
+	 		fontSize = fontSize + .3;
+	 		$('.speedtext').css({'font-size':fontSize + 'em'});
+	 	})
+	 	$('.downFontSize').on('click',function()
+	 	{
+	 		fontSize = fontSize - .3;
+	 		$('.speedtext').css({'font-size':fontSize + 'em'});
+	 	})
+	 })
+</script>
+<div class ='playPauseReset'>
+	<button type="submit" class="playPause">Play</button><button type="submit" class="reset">Reset</button>
+</div>
+<h4 class="speedtext">Are You Ready?</h2>
+	<div class="ui">
+		<input type="text" class="speedField"></input>
+		<button type="submit" class="speedButton">Submit</button><button type="submit" class="upFontSize">A+</button><button type="submit" class="downFontSize">A-</button>
+		<p class='confirmation'></p>
+		<p class='pctComplete'>0% Completed</p>
+	</div>
+	<textarea class="userText"></textarea>
+</body>
+</html>
